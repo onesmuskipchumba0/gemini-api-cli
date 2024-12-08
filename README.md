@@ -2,7 +2,9 @@
 
 An interactive command-line interface for chatting with Google's Gemini AI.
 
-![Screenshot 2024-12-08 102713](https://github.com/user-attachments/assets/e098ac61-2b6e-4698-846a-b8fd8eccbc10)
+![Screenshot 2024-12-08 123728](https://github.com/user-attachments/assets/50cdfbc5-f733-491a-84f8-c3e79b80922d)
+
+![Screenshot 2024-12-08 124001](https://github.com/user-attachments/assets/e6430450-a66e-4eb6-8cb6-1019d8271d62)
 
 ## Installation
 
