@@ -14,25 +14,19 @@ import os from 'os';
 // Configure marked to use terminal renderer
 marked.setOptions({
     renderer: new TerminalRenderer({
-        emoji: true,
-        tableOptions: {
-            chars: {
-                'top': '─',
-                'top-mid': '┬',
-                'top-left': '┌',
-                'top-right': '┐',
-                'bottom': '─',
-                'bottom-mid': '┴',
-                'bottom-left': '└',
-                'bottom-right': '┘',
-                'left': '│',
-                'left-mid': '├',
-                'mid': '─',
-                'mid-mid': '┼',
-                'right': '│',
-                'right-mid': '┤',
-                'middle': '│'
-            }
+        bulletMarker: '*',
+        tab: 2,
+        listitem: function(text) {
+            return '  * ' + text + '\n';
+        },
+        strong: chalk.bold,
+        em: chalk.italic,
+        codespan: chalk.yellow,
+        code: function(code, lang) {
+            return '\n' + chalk.yellow(code) + '\n';
+        },
+        heading: function(text, level) {
+            return '\n' + chalk.cyan.bold(text) + '\n';
         }
     })
 });
@@ -201,11 +195,11 @@ async function runChat() {
             history: [
                 {
                     role: "user",
-                    parts: "When I ask you to create a file, please respond with ONLY the code that should go in that file, without any explanation or markdown formatting. For example, if I say 'create a javascript file that logs hello world', just respond with 'console.log(\"Hello, world!\");' and nothing else."
+                    parts: "When I ask you to create a file, please respond with ONLY the code that should go in that file, without any explanation or markdown formatting. For example, if I say 'create a javascript file that logs hello world', just respond with 'console.log(\"Hello, world!\");' and nothing else. For all other questions, please format your responses using markdown with proper headings, lists, code blocks, and emphasis where appropriate."
                 },
                 {
                     role: "model",
-                    parts: "I understand. When you ask me to create a file, I will respond with only the exact code that should go in that file, without any additional text or formatting."
+                    parts: "I understand. I will provide clean code for file creation requests and properly formatted markdown responses for all other questions."
                 }
             ]
         });
@@ -276,8 +270,14 @@ async function runChat() {
 
                     // Display the response with markdown rendering
                     console.log(chalk.magenta('\nGemini > '));
-                    console.log(marked(response.text()));
+                    const formattedResponse = response.text()
+                        .replace(/^```/gm, '\n```')  // Add newline before code blocks
+                        .replace(/```$/gm, '```\n')  // Add newline after code blocks
+                        .replace(/\*\*/g, '__')      // Convert bold syntax
+                        .replace(/\*/g, '_');        // Convert italic syntax
+                    console.log(marked(formattedResponse));
                     console.log(); // Empty line for better readability
+
                 }
             } catch (error) {
                 console.error(chalk.red('\nError:', error.message));
