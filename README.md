@@ -31,7 +31,7 @@ npm start
 
 ### If installed globally:
 ```bash
-gemini-chat
+chat
 ```
 
 - Type your messages and press Enter to send them to Gemini
