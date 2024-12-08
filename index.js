@@ -9,6 +9,7 @@ import { marked } from 'marked';
 import TerminalRenderer from 'marked-terminal';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 
 // Configure marked to use terminal renderer
 marked.setOptions({
@@ -36,8 +37,34 @@ marked.setOptions({
     })
 });
 
+// Load environment variables from multiple locations
+function loadEnvFile() {
+    // Try current directory first
+    const currentDirEnv = path.join(process.cwd(), '.env');
+    if (fs.existsSync(currentDirEnv)) {
+        dotenv.config({ path: currentDirEnv });
+        return;
+    }
+
+    // Try home directory next
+    const homeDir = os.homedir();
+    const homeDirEnv = path.join(homeDir, '.env');
+    if (fs.existsSync(homeDirEnv)) {
+        dotenv.config({ path: homeDirEnv });
+        return;
+    }
+
+    // If no .env file found, check for environment variable
+    if (!process.env.GEMINI_API_KEY) {
+        console.error(chalk.red('Error: GEMINI_API_KEY not found in .env file or environment variables'));
+        console.log(chalk.yellow('\nPlease create a .env file in your home directory (~/.env) with your Gemini API key:'));
+        console.log(chalk.white('GEMINI_API_KEY=your-api-key-here'));
+        process.exit(1);
+    }
+}
+
 // Load environment variables
-dotenv.config();
+loadEnvFile();
 
 // Initialize Gemini API
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -65,11 +92,47 @@ function handleWriteCommand(input) {
 
 // Check if input is a file creation request
 function isFileCreationRequest(input) {
+    // Keywords that must be present for file creation
+    const creationKeywords = [
+        'create',
+        'make',
+        'write',
+        'generate'
+    ];
+
+    // The word "file" must be present
+    if (!input.toLowerCase().includes('file')) {
+        return false;
+    }
+
+    // At least one creation keyword must be present
+    if (!creationKeywords.some(keyword => input.toLowerCase().includes(keyword))) {
+        return false;
+    }
+
+    // Common greetings and conversation starters should not trigger file creation
+    const conversationStarters = [
+        'hi',
+        'hello',
+        'hey',
+        'greetings',
+        'good morning',
+        'good afternoon',
+        'good evening',
+        'how are you',
+        'what\'s up'
+    ];
+
+    if (conversationStarters.some(greeting => 
+        input.toLowerCase().trim() === greeting ||
+        input.toLowerCase().startsWith(greeting + ' ') ||
+        input.toLowerCase().endsWith(' ' + greeting)
+    )) {
+        return false;
+    }
+
     const patterns = [
-        /create\s+(?:a\s+)?(?:new\s+)?(\w+)\s+file/i,
-        /make\s+(?:a\s+)?(?:new\s+)?(\w+)\s+file/i,
-        /write\s+(?:a\s+)?(?:new\s+)?(\w+)\s+file/i,
-        /generate\s+(?:a\s+)?(?:new\s+)?(\w+)\s+file/i
+        /(?:create|make|write|generate)\s+(?:a\s+)?(?:new\s+)?(\w+)\s+file/i,
     ];
 
     return patterns.some(pattern => pattern.test(input));

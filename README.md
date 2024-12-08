@@ -10,10 +10,16 @@ An interactive command-line interface for chatting with Google's Gemini AI.
 ```bash
 npm install
 ```
-3. Create a `.env` file in the root directory and add your Gemini API key:
-```
-GEMINI_API_KEY=your-api-key-here
-```
+3. Set up your API key in one of these ways:
+   - Create a `.env` file in your home directory (`~/.env`):
+     ```
+     GEMINI_API_KEY=your-api-key-here
+     ```
+   - Create a `.env` file in the current directory:
+     ```
+     GEMINI_API_KEY=your-api-key-here
+     ```
+   - Set the GEMINI_API_KEY environment variable
 
 ### Global Installation
 To install the CLI globally and use it from anywhere:
@@ -81,6 +87,7 @@ Supported file types:
 - Simple command-line interface
 - Typing indicator while waiting for responses
 - Support for tables, code blocks, and other markdown elements
+- Works from any directory (uses global API key configuration)
 
 ## Requirements
 
