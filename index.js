@@ -14,19 +14,29 @@ import os from 'os';
 // Configure marked to use terminal renderer
 marked.setOptions({
     renderer: new TerminalRenderer({
-        bulletMarker: '*',
+        bulletMarker: '•',
         tab: 2,
         listitem: function(text) {
-            return '  * ' + text + '\n';
+            return '  • ' + text + '\n';
         },
-        strong: chalk.bold,
-        em: chalk.italic,
+        strong: chalk.bold.cyan,
+        em: chalk.italic.white,
         codespan: chalk.yellow,
         code: function(code, lang) {
-            return '\n' + chalk.yellow(code) + '\n';
+            return '\n' + chalk.bgGray(chalk.yellow(code)) + '\n';
         },
         heading: function(text, level) {
-            return '\n' + chalk.cyan.bold(text) + '\n';
+            const prefix = '='.repeat(level);
+            return '\n' + chalk.bold.cyan(`${prefix} ${text}`) + '\n';
+        },
+        paragraph: (text) => {
+            return '\n' + text + '\n';
+        },
+        blockquote: (text) => {
+            return chalk.gray('│ ') + chalk.italic(text.split('\n').join('\n│ ')) + '\n';
+        },
+        link: (href, title, text) => {
+            return chalk.blue.underline(href);
         }
     })
 });
