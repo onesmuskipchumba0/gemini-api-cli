@@ -296,12 +296,39 @@ async function runChat() {
     }
 }
 
+// Display ASCII art banner and info
+function displayBanner() {
+    console.log(chalk.cyan(`
+    ╔════════════════════════════════════════════════════════════╗
+    ║                                                            ║
+    ║     ██████╗ ███████╗███╗   ███╗██╗███╗   ██╗██╗          ║
+    ║    ██╔════╝ ██╔════╝████╗ ████║██║████╗  ██║██║          ║
+    ║    ██║  ███╗█████╗  ██╔████╔██║██║██╔██╗ ██║██║          ║
+    ║    ██║   ██║██╔══╝  ██║╚██╔╝██║██║██║╚██╗██║██║          ║
+    ║    ╚██████╔╝███████╗██║ ╚═╝ ██║██║██║ ╚████║██║          ║
+    ║     ╚═════╝ ╚══════╝╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═╝          ║
+    ║                                                            ║
+    ║                    CLI Assistant                           ║
+    ║                                                            ║
+    ╚════════════════════════════════════════════════════════════╝
+    `));
+    
+    console.log(chalk.yellow('Created by: ') + chalk.green('Onesmus Bett'));
+    console.log(chalk.yellow('GitHub: ') + chalk.blue('https://github.com/onesmuskipchumba0'));
+    console.log(chalk.yellow('Email: ') + chalk.blue('onesmuskipchumba5@gmail.com'));
+    console.log('\n' + chalk.cyan('Welcome to Gemini CLI Assistant! How can I help you today?') + '\n');
+}
+
 // Set up CLI commands
 const program = new Command();
 
 program
     .version('1.0.0')
-    .description('Interactive CLI for chatting with Gemini AI')
-    .action(runChat);
+    .description('Gemini AI CLI Assistant');
+
+// Display banner before starting the chat
+displayBanner();
+
+program.action(runChat);
 
 program.parse(process.argv);

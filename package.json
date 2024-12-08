@@ -4,14 +4,14 @@
   "main": "index.js",
   "type": "module",
   "bin": {
-    "chat": "./index.js"
+    "gemini": "./index.js"
   },
   "scripts": {
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["cli", "gemini", "ai", "chat"],
+  "author": "Onesmus Bett <onesmuskipchumba5@gmail.com> (https://github.com/onesmuskipchumba0)",
   "license": "ISC",
   "description": "Interactive CLI for chatting with Gemini AI",
   "dependencies": {
