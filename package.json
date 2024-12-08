@@ -1,0 +1,27 @@
+{
+  "name": "gemini-api-cli",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "bin": {
+    "gemini": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "Interactive CLI for chatting with Gemini AI",
+  "dependencies": {
+    "@google/generative-ai": "^0.1.3",
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "dotenv": "^16.3.1",
+    "marked": "^14.1.4",
+    "marked-terminal": "^7.2.1",
+    "node-fetch": "^3.3.2",
+    "readline": "^1.3.0"
+  }
+}
