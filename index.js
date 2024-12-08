@@ -7,6 +7,8 @@ import chalk from 'chalk';
 import { Command } from 'commander';
 import { marked } from 'marked';
 import TerminalRenderer from 'marked-terminal';
+import fs from 'fs';
+import path from 'path';
 
 // Configure marked to use terminal renderer
 marked.setOptions({
@@ -40,14 +42,113 @@ dotenv.config();
 // Initialize Gemini API
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+// Handle file writing command
+function handleWriteCommand(input) {
+    const match = input.match(/^\/write\s+([^\s]+)\s+(.+)$/s);
+    if (!match) {
+        console.log(chalk.red('Usage: /write filename content'));
+        return false;
+    }
+
+    const [_, filename, content] = match;
+    const filepath = path.join(process.cwd(), filename);
+
+    try {
+        fs.writeFileSync(filepath, content);
+        console.log(chalk.green(`File "${filename}" has been created successfully!`));
+        return true;
+    } catch (error) {
+        console.error(chalk.red(`Error writing file: ${error.message}`));
+        return false;
+    }
+}
+
+// Check if input is a file creation request
+function isFileCreationRequest(input) {
+    const patterns = [
+        /create\s+(?:a\s+)?(?:new\s+)?(\w+)\s+file/i,
+        /make\s+(?:a\s+)?(?:new\s+)?(\w+)\s+file/i,
+        /write\s+(?:a\s+)?(?:new\s+)?(\w+)\s+file/i,
+        /generate\s+(?:a\s+)?(?:new\s+)?(\w+)\s+file/i
+    ];
+
+    return patterns.some(pattern => pattern.test(input));
+}
+
+// Extract file type from request
+function getFileTypeFromRequest(input) {
+    const patterns = [
+        /(?:create|make|write|generate)\s+(?:a\s+)?(?:new\s+)?(\w+)\s+file/i
+    ];
+
+    for (const pattern of patterns) {
+        const match = input.match(pattern);
+        if (match) {
+            return match[1].toLowerCase();
+        }
+    }
+    return null;
+}
+
+// Get appropriate file extension
+function getFileExtension(fileType) {
+    const extensions = {
+        javascript: '.js',
+        js: '.js',
+        python: '.py',
+        py: '.py',
+        html: '.html',
+        css: '.css',
+        typescript: '.ts',
+        ts: '.ts',
+        json: '.json',
+        markdown: '.md',
+        md: '.md',
+        text: '.txt',
+        txt: '.txt'
+    };
+
+    return extensions[fileType] || '.txt';
+}
+
+// Handle commands
+function handleCommands(input) {
+    if (input.startsWith('/write')) {
+        return handleWriteCommand(input);
+    }
+    if (input === '/help') {
+        console.log(chalk.cyan('\nAvailable commands:'));
+        console.log(chalk.yellow('/write filename content') + ' - Write content to a file in the current directory');
+        console.log(chalk.yellow('/help') + ' - Show this help message');
+        console.log(chalk.yellow('exit') + ' - Exit the chat');
+        console.log('\nYou can also ask me to create files using natural language, for example:');
+        console.log(chalk.yellow('"Create a JavaScript file that logs hello world"'));
+        console.log(chalk.yellow('"Generate a Python file that calculates fibonacci numbers"'));
+        console.log();
+        return true;
+    }
+    return false;
+}
+
 async function runChat() {
     try {
         // Initialize the chat model
         const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-        const chat = model.startChat();
+        const chat = model.startChat({
+            history: [
+                {
+                    role: "user",
+                    parts: "When I ask you to create a file, please respond with ONLY the code that should go in that file, without any explanation or markdown formatting. For example, if I say 'create a javascript file that logs hello world', just respond with 'console.log(\"Hello, world!\");' and nothing else."
+                },
+                {
+                    role: "model",
+                    parts: "I understand. When you ask me to create a file, I will respond with only the exact code that should go in that file, without any additional text or formatting."
+                }
+            ]
+        });
 
         console.log(chalk.blue('Welcome to Gemini CLI Chat!'));
-        console.log(chalk.yellow('Type your messages and press Enter. Type "exit" to quit.\n'));
+        console.log(chalk.yellow('Type your messages and press Enter. Type "/help" for available commands or "exit" to quit.\n'));
 
         const rl = readline.createInterface({
             input: process.stdin,
@@ -64,22 +165,57 @@ async function runChat() {
                 return;
             }
 
+            // Check if input is a command
+            if (handleCommands(input)) {
+                rl.prompt();
+                return;
+            }
+
             try {
-                // Show typing indicator
-                process.stdout.write(chalk.cyan('Gemini is thinking...'));
+                // Check if this is a file creation request
+                if (isFileCreationRequest(input)) {
+                    const fileType = getFileTypeFromRequest(input);
+                    if (fileType) {
+                        // Show typing indicator
+                        process.stdout.write(chalk.cyan('Generating file content...'));
 
-                // Get response from Gemini
-                const result = await chat.sendMessage(input);
-                const response = await result.response;
-                
-                // Clear the typing indicator
-                process.stdout.clearLine(0);
-                process.stdout.cursorTo(0);
+                        // Get the code from Gemini
+                        const result = await chat.sendMessage(input);
+                        const code = await result.response.text();
 
-                // Display the response with markdown rendering
-                console.log(chalk.magenta('\nGemini > '));
-                console.log(marked(response.text()));
-                console.log(); // Empty line for better readability
+                        // Clear the typing indicator
+                        process.stdout.clearLine(0);
+                        process.stdout.cursorTo(0);
+
+                        // Generate filename
+                        const extension = getFileExtension(fileType);
+                        const filename = `${fileType}_${Date.now()}${extension}`;
+                        const filepath = path.join(process.cwd(), filename);
+
+                        // Write the file
+                        fs.writeFileSync(filepath, code);
+                        console.log(chalk.green(`\nFile created successfully: ${filename}`));
+                        console.log(chalk.yellow('Content:'));
+                        console.log(chalk.white(code));
+                        console.log();
+                    }
+                } else {
+                    // Regular chat interaction
+                    process.stdout.write(chalk.cyan('Gemini is thinking...'));
+
+                    // Get response from Gemini
+                    const result = await chat.sendMessage(input);
+                    const response = await result.response;
+                    
+                    // Clear the typing indicator
+                    process.stdout.clearLine(0);
+                    process.stdout.cursorTo(0);
+
+                    // Display the response with markdown rendering
+                    console.log(chalk.magenta('\nGemini > '));
+                    console.log(marked(response.text()));
+                    console.log(); // Empty line for better readability
+                }
             } catch (error) {
                 console.error(chalk.red('\nError:', error.message));
             }

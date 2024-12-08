@@ -34,9 +34,41 @@ npm start
 chat
 ```
 
+### Available Commands
 - Type your messages and press Enter to send them to Gemini
 - Type `exit` to end the chat session
-- Markdown in responses is automatically rendered in the terminal
+- Type `/help` to see available commands
+- Type `/write filename content` to create a file in the current directory
+- Ask Gemini to create files using natural language
+
+### File Creation Examples
+You can ask Gemini to create files using natural language. Here are some examples:
+
+```bash
+# Create a JavaScript file
+"Create a JavaScript file that logs hello world"
+"Make a JavaScript file that calculates fibonacci numbers"
+
+# Create a Python file
+"Generate a Python file that sorts a list"
+"Create a Python file with a simple web server"
+
+# Create other types of files
+"Create an HTML file with a basic webpage"
+"Generate a CSS file for a navigation menu"
+```
+
+The files will be created in your current directory with appropriate extensions and generated content.
+
+Supported file types:
+- JavaScript (.js)
+- Python (.py)
+- HTML (.html)
+- CSS (.css)
+- TypeScript (.ts)
+- JSON (.json)
+- Markdown (.md)
+- Text (.txt)
 
 ## Features
 
@@ -44,6 +76,8 @@ chat
 - Real-time responses from Gemini AI
 - Color-coded messages for better readability
 - Markdown rendering in the terminal
+- Natural language file creation
+- File writing capability in current directory
 - Simple command-line interface
 - Typing indicator while waiting for responses
 - Support for tables, code blocks, and other markdown elements
