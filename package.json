@@ -4,7 +4,9 @@
   "main": "index.js",
   "type": "module",
   "bin": {
-    "gemini": "./index.js"
+    "gemini": "./index.js",
+    "ai":"./index.js",
+    "chat":"./index.js"
   },
   "scripts": {
     "start": "node index.js",
